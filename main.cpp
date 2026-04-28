@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_image.h>
 #include <filesystem>
 #include <vector>
 #include <string>
@@ -37,6 +38,9 @@ int main() {
         return 1;
     }
 
+    // --- IMAGE INIT ---
+    IMG_Init(IMG_INIT_PNG);
+
     // --- OPEN SNES CONTROLLER ---
     SDL_Joystick* js = SDL_JoystickOpen(0);
 
@@ -61,6 +65,21 @@ int main() {
   // --- SPLASH SCREEN ---
     Uint32 startTime = SDL_GetTicks();
     bool splash = true;
+
+    SDL_Texture* bg_texture = nullptr;
+    SDL_Texture* logo_texture = nullptr;
+    SDL_Surface* bg_surface = IMG_Load("./Splashscreen/background.png");
+    SDL_Surface* logo_surface = IMG_Load("./Splashscreen/logo.png");
+
+    if (bg_surface) {
+        bg_texture = SDL_CreateTextureFromSurface(ren, bg_surface);
+        SDL_FreeSurface(bg_surface);
+    }
+    if (logo_surface) {
+        logo_texture = SDL_CreateTextureFromSurface(ren, logo_surface);
+        SDL_FreeSurface(logo_surface);
+    }
+
     while (splash) {
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
@@ -74,12 +93,25 @@ int main() {
         SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
         SDL_RenderClear(ren);
 
-        SDL_SetRenderDrawColor(ren, 0, 128, 255, 255);
-        SDL_Rect logo = { 440, 260, 400, 200 };
-        SDL_RenderFillRect(ren, &logo);
+        // Draw background
+        if (bg_texture) {
+            SDL_Rect bg_rect = { 0, 0, 1280, 720 };
+            SDL_RenderCopy(ren, bg_texture, NULL, &bg_rect);
+        }
+
+        // Draw logo at top
+        if (logo_texture) {
+            SDL_QueryTexture(logo_texture, NULL, NULL, &logo_rect.w, &logo_rect.h);
+            logo_rect.x = (1280 - logo_rect.w) / 2;  // center horizontally
+            logo_rect.y = 20;  // top of screen
+            SDL_RenderCopy(ren, logo_texture, NULL, &logo_rect);
+        }
 
         SDL_RenderPresent(ren);
     }
+
+    if (bg_texture) SDL_DestroyTexture(bg_texture);
+    if (logo_texture) SDL_DestroyTexture(logo_texture);
 
     // --- LOAD ROMS ---
     std::vector<std::string> roms = get_roms("./ROMs/SNES");
