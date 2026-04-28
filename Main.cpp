@@ -7,8 +7,8 @@
 
 namespace fs = std::filesystem;
 
-std::vectorstd::string get_roms(const std::string& path) {
-    std::vectorstd::string roms;
+std::vector<std::string> get_roms(const std::string& path) {
+    std::vector<std::string> roms;
     for (auto& p : fs::directory_iterator(path)) {
  
      if (p.path().extension() == ".smc" || p.path().extension() == ".sfc") {
@@ -50,7 +50,7 @@ int main() {
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
 
     // --- LOAD FONT ---
-    TTF_Font* font = TTF_OpenFont("/home/Dr.E_Brown/DeLorean/DejaVuSans.ttf", 24);
+    TTF_Font* font = TTF_OpenFont("./DejaVuSans.ttf", 24);
     if (!font) {
         std::cerr << "Failed to load font\n";
         return 1;
@@ -81,7 +81,7 @@ int main() {
     }
 
     // --- LOAD ROMS ---
-    std::vectorstd::string roms = get_roms("/home/Dr.E_Brown/ROMs/SNES");
+    std::vector<std::string> roms = get_roms("./ROMs/SNES");
     int index = 0;
     bool running = true;
     SDL_Event e;
