@@ -89,6 +89,22 @@ int main() {
         SDL_FreeSurface(logo_surface);
     }
 
+    // LOAD FLUX FRAMES
+    SDL_Texture* flux1 = nullptr;
+    SDL_Texture* flux2 = nullptr;
+    SDL_Texture* flux3 = nullptr;
+    SDL_Texture* flux4 = nullptr;
+
+    SDL_Surface* f1 = IMG_Load("./Splashscreen/flux1.png");
+    SDL_Surface* f2 = IMG_Load("./Splashscreen/flux2.png");
+    SDL_Surface* f3 = IMG_Load("./Splashscreen/flux3.png");
+    SDL_Surface* f4 = IMG_Load("./Splashscreen/flux4.png");
+
+    if (f1) { flux1 = SDL_CreateTextureFromSurface(ren, f1); SDL_FreeSurface(f1); }
+    if (f2) { flux2 = SDL_CreateTextureFromSurface(ren, f2); SDL_FreeSurface(f2); }
+    if (f3) { flux3 = SDL_CreateTextureFromSurface(ren, f3); SDL_FreeSurface(f3); }
+    if (f4) { flux4 = SDL_CreateTextureFromSurface(ren, f4); SDL_FreeSurface(f4); }
+
     while (splash) {
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
@@ -107,6 +123,7 @@ int main() {
             SDL_RenderCopy(ren, bg_texture, NULL, &bg_rect);
         }
 
+        // Draw logo
         if (logo_texture) {
             SDL_QueryTexture(logo_texture, NULL, NULL, &logo_rect.w, &logo_rect.h);
 
@@ -120,11 +137,39 @@ int main() {
             SDL_RenderCopy(ren, logo_texture, NULL, &logo_rect);
         }
 
+        // Determine flux frame
+        Uint32 elapsed = now - startTime;
+        SDL_Texture* flux = nullptr;
+
+        if (elapsed < 3000)       flux = flux1;
+        else if (elapsed < 6000)  flux = flux2;
+        else if (elapsed < 9000)  flux = flux3;
+        else if (elapsed < 12000) flux = flux4;
+
+        // Draw flux frame
+        if (flux) {
+            SDL_Rect flux_rect;
+            SDL_QueryTexture(flux, NULL, NULL, &flux_rect.w, &flux_rect.h);
+
+            float fscale = 0.5f;
+            flux_rect.w *= fscale;
+            flux_rect.h *= fscale;
+
+            flux_rect.x = (1280 - flux_rect.w) / 2;
+            flux_rect.y = 200;
+
+            SDL_RenderCopy(ren, flux, NULL, &flux_rect);
+        }
+
         SDL_RenderPresent(ren);
     }
 
     if (bg_texture) SDL_DestroyTexture(bg_texture);
     if (logo_texture) SDL_DestroyTexture(logo_texture);
+    if (flux1) SDL_DestroyTexture(flux1);
+    if (flux2) SDL_DestroyTexture(flux2);
+    if (flux3) SDL_DestroyTexture(flux3);
+    if (flux4) SDL_DestroyTexture(flux4);
 
     // LOAD ROMS
     std::vector<std::string> roms = get_roms("/home/Dr.E_Brown/DeLorean/ROMs/SNES");
