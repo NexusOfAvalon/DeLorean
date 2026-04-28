@@ -105,8 +105,8 @@ int main() {
             // SNES controller button
  
        if (e.type == SDL_JOYBUTTONDOWN) {
-                if (e.jbutton.button == 1) {
-                    std::string cmd = "retroarch \"" + roms[index] + "\" &";
+                if (e.jbutton.button == 0) {
+                    std::string cmd = "mednafen \"" + roms[index] + "\" &";
                     system(cmd.c_str());
                 }
             }
