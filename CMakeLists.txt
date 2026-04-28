@@ -18,4 +18,6 @@ add_executable(delorean
 target_link_libraries(delorean
     ${SDL2_LIBRARIES}
     ${SDL2_TTF_LIBRARIES}
+    SDL2_ttf
+    SDL2
 )
