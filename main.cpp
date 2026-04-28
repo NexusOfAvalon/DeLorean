@@ -137,7 +137,7 @@ int main() {
             SDL_RenderCopy(ren, logo_texture, NULL, &logo_rect);
         }
 
-        // Determine flux frame
+        // Determine flux frame (AKA faux loading screen)
         Uint32 elapsed = now - startTime;
         SDL_Texture* flux = nullptr;
 
