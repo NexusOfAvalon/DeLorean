@@ -97,7 +97,7 @@ int main() {
         }
 
         Uint32 now = SDL_GetTicks();
-        if (now - startTime > 10000) splash = false;
+        if (now - startTime > 12000) splash = false;
 
         SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
         SDL_RenderClear(ren);
