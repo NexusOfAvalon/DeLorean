@@ -106,7 +106,7 @@ int main() {
  
        if (e.type == SDL_JOYBUTTONDOWN) {
                 if (e.jbutton.button == 1) {
-                    std::string cmd = "snes9x-gtk \"" + roms[index] + "\" &";
+                    std::string cmd = "retroarch \"" + roms[index] + "\" &";
                     system(cmd.c_str());
                 }
             }
