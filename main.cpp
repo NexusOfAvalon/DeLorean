@@ -105,9 +105,14 @@ int main() {
             // SNES controller button
  
        if (e.type == SDL_JOYBUTTONDOWN) {
+                // Launch game - A button
                 if (e.jbutton.button == 0) {
                     std::string cmd = "mednafen \"" + roms[index] + "\" &";
                     system(cmd.c_str());
+                }
+                // Exit game - Select button
+                if (e.jbutton.button == 6) {
+                    system("pkill mednafen");
                 }
             }
 
