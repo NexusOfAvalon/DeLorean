@@ -123,7 +123,6 @@ int main() {
             SDL_RenderCopy(ren, bg_texture, NULL, &bg_rect);
         }
 
-        // Draw logo
         if (logo_texture) {
             SDL_QueryTexture(logo_texture, NULL, NULL, &logo_rect.w, &logo_rect.h);
 
@@ -137,7 +136,6 @@ int main() {
             SDL_RenderCopy(ren, logo_texture, NULL, &logo_rect);
         }
 
-        // Determine flux frame (AKA faux loading screen)
         Uint32 elapsed = now - startTime;
         SDL_Texture* flux = nullptr;
 
@@ -146,7 +144,6 @@ int main() {
         else if (elapsed < 9000)  flux = flux3;
         else if (elapsed < 12000) flux = flux4;
 
-        // Draw flux frame
         if (flux) {
             SDL_Rect flux_rect;
             SDL_QueryTexture(flux, NULL, NULL, &flux_rect.w, &flux_rect.h);
@@ -181,25 +178,46 @@ int main() {
     while (running) {
 
         while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_QUIT) running = false;
 
-            if (e.type == SDL_JOYAXISMOTION && js) {
-                if (e.jaxis.axis == 1) {
-                    if (e.jaxis.value < -8000) index--;
-                    if (e.jaxis.value >  8000) index++;
-                }
+            // Quit event
+            if (e.type == SDL_QUIT)
+                running = false;
+
+            // TEMP DEBUG
+            if (e.type == SDL_JOYBUTTONDOWN) {
+                std::cout << "Button pressed: " << (int)e.jbutton.button << "\n";
             }
 
+            // D-PAD NAVIGATION
             if (e.type == SDL_JOYBUTTONDOWN && js) {
-                if (e.jbutton.button == 0) {
+
+                if (e.jbutton.button == 6) index--; // UP
+                if (e.jbutton.button == 7) index++; // DOWN
+            }
+
+            // FACE BUTTONS (A/B/X/Y)
+            if (e.type == SDL_JOYBUTTONDOWN && js) {
+
+                if (e.jbutton.button == 1) { /* A */ }
+                if (e.jbutton.button == 2) { /* B */ }
+                if (e.jbutton.button == 0) { /* X */ }
+                if (e.jbutton.button == 3) { /* Y */ }
+            }
+
+            // START launches game, SELECT closes game
+            if (e.type == SDL_JOYBUTTONDOWN && js) {
+
+                if (e.jbutton.button == 9) {
                     std::string cmd = "mednafen \"" + roms[index] + "\" &";
                     system(cmd.c_str());
                 }
-                if (e.jbutton.button == 6) {
-                    system("pkill mednafen");
+
+                if (e.jbutton.button == 8) {
+                    system("pkill -9 -f mednafen");
                 }
             }
 
+            // Keyboard fallback
             if (e.type == SDL_KEYDOWN) {
                 if (e.key.keysym.sym == SDLK_UP) index--;
                 if (e.key.keysym.sym == SDLK_DOWN) index++;
@@ -212,7 +230,17 @@ int main() {
         SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
         SDL_RenderClear(ren);
 
-        int startY = 200;
+        // TITLE TEXT
+        SDL_Color titleColor = {255, 255, 0};
+        SDL_Surface* tSurf = TTF_RenderText_Solid(font, "DeLorean - Where we're going, we don't need roads.", titleColor);
+        SDL_Texture* tTex = SDL_CreateTextureFromSurface(ren, tSurf);
+        SDL_Rect tRect = {100, 20, tSurf->w, tSurf->h};
+        SDL_RenderCopy(ren, tTex, NULL, &tRect);
+        SDL_FreeSurface(tSurf);
+        SDL_DestroyTexture(tTex);
+
+        // ROM LIST
+        int startY = 150;
         for (int i = 0; i < roms.size(); i++) {
             int y = startY + (i - index) * 50;
 
@@ -220,7 +248,16 @@ int main() {
                 ? SDL_Color{0, 255, 255}
                 : SDL_Color{255, 255, 255};
 
-            SDL_Surface* surf = TTF_RenderText_Solid(font, roms[i].c_str(), color);
+            if (i == index) {
+                SDL_Surface* arrowSurf = TTF_RenderText_Solid(font, ">", color);
+                SDL_Texture* arrowTex = SDL_CreateTextureFromSurface(ren, arrowSurf);
+                SDL_Rect aRect = {60, y, arrowSurf->w, arrowSurf->h};
+                SDL_RenderCopy(ren, arrowTex, NULL, &aRect);
+                SDL_FreeSurface(arrowSurf);
+                SDL_DestroyTexture(arrowTex);
+            }
+
+            SDL_Surface* surf = TTF_RenderText_Solid(font, clean_name(roms[i]).c_str(), color);
             SDL_Texture* tex = SDL_CreateTextureFromSurface(ren, surf);
 
             SDL_Rect dst = {100, y, surf->w, surf->h};
@@ -229,6 +266,26 @@ int main() {
             SDL_FreeSurface(surf);
             SDL_DestroyTexture(tex);
         }
+
+        // INSTRUCTIONS
+        SDL_Color instColor = {200, 200, 200};
+
+        SDL_Surface* inst1 = TTF_RenderText_Solid(font, "Press START to launch game", instColor);
+        SDL_Surface* inst2 = TTF_RenderText_Solid(font, "Press SELECT to close game", instColor);
+
+        SDL_Texture* instTex1 = SDL_CreateTextureFromSurface(ren, inst1);
+        SDL_Texture* instTex2 = SDL_CreateTextureFromSurface(ren, inst2);
+
+        SDL_Rect i1 = {100, 650, inst1->w, inst1->h};
+        SDL_Rect i2 = {100, 680, inst2->w, inst2->h};
+
+        SDL_RenderCopy(ren, instTex1, NULL, &i1);
+        SDL_RenderCopy(ren, instTex2, NULL, &i2);
+
+        SDL_FreeSurface(inst1);
+        SDL_FreeSurface(inst2);
+        SDL_DestroyTexture(instTex1);
+        SDL_DestroyTexture(instTex2);
 
         SDL_RenderPresent(ren);
     }
